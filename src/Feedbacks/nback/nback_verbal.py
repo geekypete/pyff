@@ -40,8 +40,8 @@ class nback_verbal(MainloopFeedback):
     FPS = 60
     COUNTDOWN = 0
     COLOR = 255,255,255
-    STIMSIZE = 150
-    CUESIZE = 450
+    STIMSIZE = 125
+    CUESIZE = 400
     # Triggers
     RUN_START, RUN_END = 252,253
     COUNTDOWN_START, COUNTDOWN_END = 200,201
@@ -65,7 +65,7 @@ class nback_verbal(MainloopFeedback):
         self.stimTime = BCI.fpsConvert(self.STIMTIME,self.fps)  #BCI.fpsConvert(100,self.fps)               # How long the stimulus is displayed (in frames)
         self.delayTime = BCI.fpsConvert(self.DELAYTIME,self.fps)       # How long to wait before response is accepted 
         self.cueTime = BCI.fpsConvert(self.CUETIME,self.fps)
-        self.nCountdown = self.COUNTDOWN            # N of secs to count down
+        self.nCountdown = 0           # N of secs to count down
         self.auditoryFeedback = True       # Auditory feedback provided
         # Triggers
      
@@ -73,7 +73,7 @@ class nback_verbal(MainloopFeedback):
         #self.auditoryFeedback = False   # If yes, gives a beep when a wrong response is given
         # Graphical settings
         self.bgcolor = 0, 0, 0
-        self.screenPos = [200,200,1000,800]
+        self.screenPos = [200,200,1024,768]
         self.fullscreen = True
         self.color = self.COLOR        # Color of symbol
         self.size = self.STIMSIZE               # Size of symbol 
@@ -239,6 +239,10 @@ class nback_verbal(MainloopFeedback):
             # Draw symbol
             #symbol = self.sequencealt[self.currentStim] 
             #print "CUE CUE CUE CUE CUE"
+            if self.currentTick == 0:
+                self.p.setData(0)
+                time.sleep(0.01)
+                self.p.setData(int('{:07b}'.format(9)[::-1],2))    
             txt = self.cueFont.render("+",self.ANTIALIAS,self.color)
             txt_rect = txt.get_rect(center=self.screenCenter)
             self.screen.blit(self.background,self.background_rect)
