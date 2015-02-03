@@ -49,7 +49,7 @@ class nback_verbal(MainloopFeedback):
     # States during running
     # First stimulus is shown, and after pre-response time
     # response is to be entered
-    COUNTDOWN, CUE, DELAY, STIM= 1,2,3,4
+    CUE, DELAY, STIM= 1,2,3
     
     # Antialising with the text
     ANTIALIAS = 1
@@ -212,12 +212,12 @@ class nback_verbal(MainloopFeedback):
             #print datetime.now() - self.current
             self.screen.blit(txt, txt_rect)
             self.current = datetime.now()
-            
-            pygame.display.update()
             if self.currentTick == 0:
                 self.p.setData(0)
                 time.sleep(0.01)
                 self.p.setData(int('{:07b}'.format(self.sequencealt[self.currentStim] [1])[::-1],2))
+            pygame.display.update()
+          
                 #print("%s = %s  " % (self.sequencealt[self.currentStim] [0], self.sequencealt[self.currentStim] [1]))
                 #self.p.setData(0)
             #time.sleep(1)
