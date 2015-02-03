@@ -32,11 +32,20 @@ from FeedbackBase.MainloopFeedback import MainloopFeedback
 from datetime import datetime
 class nback_verbal(MainloopFeedback):
     
+  
+ 
+    STIMTIME = 500
+    CUETIME = 500
+    DELAYTIME = 1000
+    FPS = 60
+    COUNTDOWN = 0
+    COLOR = 255,255,255
+    STIMSIZE = 150
+    CUESIZE = 450
     # Triggers
     RUN_START, RUN_END = 252,253
     COUNTDOWN_START, COUNTDOWN_END = 200,201
     FALSCH , RICHTIG = 7,8      # Response markers
-    STIMTIME = 500
     # States during running
     # First stimulus is shown, and after pre-response time
     # response is to be entered
@@ -52,11 +61,11 @@ class nback_verbal(MainloopFeedback):
         self.nOccur = 1                 # Total number of occurences of each symbol
         self.n = 1                      # Current symbol is matched with the nth symbol back
         # Timing 
-        self.fps = 60                   # Frames-per-second
-        self.stimTime = BCI.fpsConvert(STIMTIME,self.fps)  #BCI.fpsConvert(100,self.fps)               # How long the stimulus is displayed (in frames)
-        self.delayTime = BCI.fpsConvert(1000,self.fps)       # How long to wait before response is accepted 
-        self.cueTime = BCI.fpsConvert(500,self.fps)
-        self.nCountdown = 0             # N of secs to count down
+        self.fps = self.FPS                   # Frames-per-second
+        self.stimTime = BCI.fpsConvert(self.STIMTIME,self.fps)  #BCI.fpsConvert(100,self.fps)               # How long the stimulus is displayed (in frames)
+        self.delayTime = BCI.fpsConvert(self.DELAYTIME,self.fps)       # How long to wait before response is accepted 
+        self.cueTime = BCI.fpsConvert(self.CUETIME,self.fps)
+        self.nCountdown = self.COUNTDOWN            # N of secs to count down
         self.auditoryFeedback = True       # Auditory feedback provided
         # Triggers
      
@@ -66,8 +75,8 @@ class nback_verbal(MainloopFeedback):
         self.bgcolor = 0, 0, 0
         self.screenPos = [200,200,1000,800]
         self.fullscreen = True
-        self.color = 255,255,255        # Color of symbol
-        self.size = 200                # Size of symbol 
+        self.color = self.COLOR        # Color of symbol
+        self.size = self.STIMSIZE               # Size of symbol 
         self.current = datetime.now()  
     def _init_pygame(self):
         # Initialize pygame, open screen and fill screen with background color 
@@ -89,7 +98,7 @@ class nback_verbal(MainloopFeedback):
         self.clock = pygame.time.Clock()
         #pygame.mouse.set_visible(False)
         self.font = pygame.font.Font(None, self.size)
-        self.cueFont = pygame.font.Font(None, 600)
+        self.cueFont = pygame.font.Font(None, self.CUESIZE)
         # init sound engine
         pygame.mixer.init()
 
