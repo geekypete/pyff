@@ -128,19 +128,19 @@ class nback_verbal(MainloopFeedback):
         # If last state is finished, proceed to next state
         if self.state_finished:
             if self.state == self.COUNTDOWN:
-                self.state = self.CUE
-            elif self.state == self.CUE:
                 self.state = self.PREDELAY
             elif self.state == self.PREDELAY:
+                self.state = self.CUE
+            elif self.state == self.CUE:
+                self.state = self.POSTDELAY
+            elif self.state == self.POSTDELAY:
                 if self.currentStim == self.nStim:
                     self.on_stop()
                 else:
                     self.state = self.STIM
             elif self.state == self.STIM:
-                self.state = self.POSTDELAY
-            elif self.state == self.POSTDELAY:
-                self.state = self.CUE
-        
+                self.state = self.PREDELAY
+
             self.currentTick = 0        # Reset tick count
             self.state_finished = False
 
@@ -273,8 +273,9 @@ class nback_verbal(MainloopFeedback):
             self.screen.blit(self.background,self.background_rect)
             pygame.display.update()
             self.currentTick += 1
-            if self.currentTick ==self.predelayTime-5:
-                self.send_parallel(int('{:07b}'.format(self.sequencealt[self.currentStim] [1])[::-1],2))
+            if self.currentTick ==self.predelayTime-6:
+                self.send_parallel(int('{:07b}'.format(self.CUEVAL)[::-1],2))
+                
             print 'Delay happening', self.currentTick
         
    
@@ -289,8 +290,8 @@ class nback_verbal(MainloopFeedback):
             # Draw background
             self.screen.blit(self.background,self.background_rect)
             pygame.display.update()
-            if self.currentTick == self.postdelayTime-5:
-                self.send_parallel(int('{:07b}'.format(self.CUEVAL)[::-1],2))
+            if self.currentTick == self.postdelayTime-6:
+                self.send_parallel(int('{:07b}'.format(self.sequencealt[self.currentStim] [1])[::-1],2))
             self.currentTick += 1
             
             print 'POSTDelay happening', self.currentTick
