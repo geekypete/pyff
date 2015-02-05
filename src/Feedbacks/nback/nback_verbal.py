@@ -37,7 +37,7 @@ class nback_verbal(MainloopFeedback):
     STIMTIME = 500
     CUETIME = 500
     PREDELAYTIME = 1000
-    POSTDELAYTIME = 1000
+    POSTDELAYTIME = 1500
     FPS = 60
     COUNTDOWN = 0
     COLOR = 255,255,255
@@ -120,8 +120,7 @@ class nback_verbal(MainloopFeedback):
         self.state_finished = False
         self.p = parallel.Parallel()
         dir = os.path.dirname(sys.modules[__name__].__file__) # Get current dir
-        if self.auditoryFeedback:
-            self.sound = pygame.mixer.Sound(dir + "/sound18.wav")
+        self.sound = pygame.mixer.Sound(dir + "/Tone.wav")
         
          
     def tick(self):
@@ -290,6 +289,8 @@ class nback_verbal(MainloopFeedback):
             # Draw background
             self.screen.blit(self.background,self.background_rect)
             pygame.display.update()
+            if self.currentTick == BCI.fpsConvert(600,60):
+                self.sound.play()
             if self.currentTick == self.postdelayTime-6:
                 self.send_parallel(int('{:07b}'.format(self.sequencealt[self.currentStim] [1])[::-1],2))
             self.currentTick += 1
