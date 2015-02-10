@@ -1,5 +1,5 @@
-# nback_verbal.py -
-# Copyright (C) 2009  Matthias Treder
+# StimulusPresentation.py -
+# Copyright (C) 2015 Peter Lawson
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ class StimulusPresentation(MainloopFeedback):
     STIMTIME = 500
     CUETIME = 500
     PREDELAYTIME = 1000
-    POSTDELAYTIME = 1500
+    POSTDELAYTIME = 1000
     FPS = 60
     COUNTDOWN = 0
     COLOR = 255,255,255
@@ -99,7 +99,7 @@ class StimulusPresentation(MainloopFeedback):
         self.background_rect = self.background.get_rect(center = (self.screenPos[2]/2,self.screenPos[3]/2) )
         self.screen.blit(self.background,self.background_rect)
         self.clock = pygame.time.Clock()
-        #pygame.mouse.set_visible(False)
+        pygame.mouse.set_visible(False)
         self.font = pygame.font.Font(None, self.size)
         self.cueFont = pygame.font.Font(None, self.CUESIZE)
         # init sound engine
@@ -275,7 +275,7 @@ class StimulusPresentation(MainloopFeedback):
             if self.currentTick ==self.predelayTime-6:
                 self.send_parallel(int('{:07b}'.format(self.CUEVAL)[::-1],2))
                 
-            print 'Delay happening', self.currentTick
+            
         
    
     def postdelay(self):
@@ -289,13 +289,13 @@ class StimulusPresentation(MainloopFeedback):
             # Draw background
             self.screen.blit(self.background,self.background_rect)
             pygame.display.update()
-            if self.currentTick == BCI.fpsConvert(600,60):
-                self.sound.play()
+            #if self.currentTick == BCI.fpsConvert(600,60):
+                #self.sound.play()
             if self.currentTick == self.postdelayTime-6:
-                self.send_parallel(int('{:07b}'.format(self.sequencealt[self.currentStim] [1])[::-1],2))
+                self.send_parallel(int('{:07b}'.format(self.sequencealt[self.currentStim-1] [1])[::-1],2))
             self.currentTick += 1
             
-            print 'POSTDelay happening', self.currentTick
+      
     
 
 
