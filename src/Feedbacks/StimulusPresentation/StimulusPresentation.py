@@ -33,10 +33,11 @@ from datetime import datetime
 class StimulusPresentation(MainloopFeedback):
     
   
- 
+    CUEFIRST = True
     STIMTIME = 500
     CUETIME = 500
-    PREDELAYTIME = 1000
+    COLORCUE = True
+    PREDELAYTIME =  1000
     POSTDELAYTIME = 1000
     FPS = 60
     COUNTDOWN = 0
@@ -64,16 +65,13 @@ class StimulusPresentation(MainloopFeedback):
         self.n = 1                      # Current symbol is matched with the nth symbol back
         # Timing 
         self.fps = self.FPS                   # Frames-per-second
-        self.stimTime = BCI.fpsConvert((self.STIMTIME-50),self.fps) #BCI.fpsConvert(100,self.fps)               # How long the stimulus is displayed (in frames)
-        self.predelayTime = BCI.fpsConvert(self.PREDELAYTIME,self.fps)     # How long to wait before response is accepted  # How long to wait before response is accepted 
-        self.postdelayTime = BCI.fpsConvert(self.POSTDELAYTIME,self.fps)    
-        self.cueTime = BCI.fpsConvert((self.CUETIME-50),self.fps) 
+
         self.nCountdown = 0           # N of secs to count down
         self.auditoryFeedback = True       # Auditory feedback provided
         # Triggers
      
         # Auditory settings
-        #self.auditoryFeedback = False   # If yes, gives a beep when a wrong response is given
+        self.auditoryFeedback = True   # If yes, gives a beep when a wrong response is given
         # Graphical settings
         self.bgcolor = 0, 0, 0
         self.screenPos = [200,200,1024,768]
@@ -121,27 +119,52 @@ class StimulusPresentation(MainloopFeedback):
         self.p = parallel.Parallel()
         dir = os.path.dirname(sys.modules[__name__].__file__) # Get current dir
         self.sound = pygame.mixer.Sound(dir + "/Tone.wav")
-        
+        self.stimTime = BCI.fpsConvert((self.STIMTIME),self.fps) #BCI.fpsConvert(100,self.fps)               # How long the stimulus is displayed (in frames)
+        self.predelayTime = BCI.fpsConvert(self.PREDELAYTIME-50,self.fps)     # How long to wait before response is accepted  # How long to wait before response is accepted 
+        self.postdelayTime = BCI.fpsConvert(self.POSTDELAYTIME-50,self.fps)    
+        self.cueTime = BCI.fpsConvert((self.CUETIME),self.fps) 
+        print self.sound.get_length()
          
     def tick(self):
-        # If last state is finished, proceed to next state
-        if self.state_finished:
-            if self.state == self.COUNTDOWN:
-                self.state = self.PREDELAY
-            elif self.state == self.PREDELAY:
-                self.state = self.CUE
-            elif self.state == self.CUE:
-                self.state = self.POSTDELAY
-            elif self.state == self.POSTDELAY:
-                if self.currentStim == self.nStim:
-                    self.on_stop()
-                else:
-                    self.state = self.STIM
-            elif self.state == self.STIM:
-                self.state = self.PREDELAY
+        if self.CUEFIRST:
+            # If last state is finished, proceed to next state
+            if self.state_finished:
+                if self.state == self.COUNTDOWN:
+                    self.state = self.PREDELAY
+                elif self.state == self.PREDELAY:
+                    self.state = self.CUE
+                elif self.state == self.CUE:
+                    self.state = self.POSTDELAY
+                elif self.state == self.POSTDELAY:
+                    if self.currentStim == self.nStim:
+                        self.on_stop()
+                    else:
+                        self.state = self.STIM
+                elif self.state == self.STIM:
+                    self.state = self.PREDELAY
 
-            self.currentTick = 0        # Reset tick count
-            self.state_finished = False
+                self.currentTick = 0        # Reset tick count
+                self.state_finished = False
+                
+        else:
+            # If last state is finished, proceed to next state
+            if self.state_finished:
+                if self.state == self.COUNTDOWN:
+                    self.state = self.PREDELAY
+                elif self.state == self.PREDELAY:
+                    if self.currentStim == self.nStim:
+                        self.on_stop()
+                    else:
+                        self.state = self.STIM
+                elif self.state == self.STIM:
+                    self.state = self.POSTDELAY
+                elif self.state == self.POSTDELAY:
+                    self.state = self.CUE
+                elif self.state == self.CUE:
+                    self.state = self.PREDELAY
+
+                self.currentTick = 0        # Reset tick count
+                self.state_finished = False
 
     def play_tick(self):
         if self.checkWindowFocus():
@@ -250,8 +273,14 @@ class StimulusPresentation(MainloopFeedback):
                 #self.send_parallel(int('{:07b}'.format(self.CUEVAL)[::-1],2))
                 #self.p.setData(0)
                 #time.sleep(0.01)
-                #self.p.setData(int('{:07b}'.format(9)[::-1],2))    
-            txt = self.cueFont.render("+",self.ANTIALIAS,self.color)
+                #self.p.setData(int('{:07b}'.format(9)[::-1],2)) 
+            if self.COLORCUE==True:   
+                if  self.sequencealt[self.currentStim-1] [2]>1:
+                    txt = self.cueFont.render("+",self.ANTIALIAS,(255,0,0))
+                else:
+                    txt = self.cueFont.render("+",self.ANTIALIAS,(0,255,0))
+            else:
+                txt = self.cueFont.render("+",self.ANTIALIAS,self.color)
             txt_rect = txt.get_rect(center=self.screenCenter)
             self.screen.blit(self.background,self.background_rect)
             #print datetime.now() - self.current
@@ -272,10 +301,15 @@ class StimulusPresentation(MainloopFeedback):
             self.screen.blit(self.background,self.background_rect)
             pygame.display.update()
             self.currentTick += 1
-            if self.currentTick ==self.predelayTime-6:
-                self.send_parallel(int('{:07b}'.format(self.CUEVAL)[::-1],2))
-                
-            
+            if self.CUEFIRST:
+                if self.currentTick ==self.predelayTime-6:
+                    self.send_parallel(int('{:07b}'.format(self.CUEVAL)[::-1],2))
+            else:
+                if self.currentTick == self.postdelayTime-6:
+                    self.send_parallel(int('{:07b}'.format(self.sequencealt[self.currentStim-1] [1])[::-1],2))      
+                if self.currentTick == BCI.fpsConvert(300,60):
+                    self.sound.play()
+                    print self.sound.get_length()
         
    
     def postdelay(self):
@@ -289,12 +323,17 @@ class StimulusPresentation(MainloopFeedback):
             # Draw background
             self.screen.blit(self.background,self.background_rect)
             pygame.display.update()
-            #if self.currentTick == BCI.fpsConvert(600,60):
-                #self.sound.play()
-            if self.currentTick == self.postdelayTime-6:
-                self.send_parallel(int('{:07b}'.format(self.sequencealt[self.currentStim-1] [1])[::-1],2))
+
+            if self.CUEFIRST:
+                if self.currentTick == self.postdelayTime-6:
+                    self.send_parallel(int('{:07b}'.format(self.sequencealt[self.currentStim-1] [1])[::-1],2))
+                if self.currentTick == BCI.fpsConvert(300,60):
+                    self.sound.play()
+            else:
+                if self.currentTick ==self.predelayTime-6:
+                    self.send_parallel(int('{:07b}'.format(self.CUEVAL)[::-1],2))
             self.currentTick += 1
-            
+                            
       
     
 
