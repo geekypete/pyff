@@ -54,6 +54,8 @@ class StimulusPresentation(MainloopFeedback):
 
     def pre_mainloop(self):
         """
+        Initialize non-modifiable variables. Users should not modify variables within this region unless they are
+        certain of what they are doing.
         """
         self._init_pygame()
         time.sleep(2)
@@ -79,8 +81,11 @@ class StimulusPresentation(MainloopFeedback):
         self.cueTime = BCI.fpsConvert((self.cueTime),self.fps) 
    
     def tick(self):
+        """
+        Tick increments the state between countdown, pre and post delay, cue presentation, and stimulus presentation.
+        """
         if self.cueFirst:
-            # If last state is finished, proceed to next state
+            """ If last state is finished, proceed to next state"""
             if self.state_finished:
                 if self.state == self.COUNTDOWN:
                     self.state = self.PREDELAY
@@ -96,11 +101,11 @@ class StimulusPresentation(MainloopFeedback):
                 elif self.state == self.STIM:
                     self.state = self.PREDELAY
 
-                self.currentTick = 0        # Reset tick count
+                self.currentTick = 0       
                 self.state_finished = False
                 
         else:
-            # If last state is finished, proceed to next state
+            """ If last state is finished, proceed to next state"""
             if self.state_finished:
                 if self.state == self.COUNTDOWN:
                     self.state = self.PREDELAY
@@ -116,10 +121,13 @@ class StimulusPresentation(MainloopFeedback):
                 elif self.state == self.CUE:
                     self.state = self.PREDELAY
 
-                self.currentTick = 0        # Reset tick count
+                self.currentTick = 0       
                 self.state_finished = False
 
     def play_tick(self):
+        """
+        Execute function associated with current state.
+        """
         if self.checkWindowFocus():
             state = self.state
             if state == self.COUNTDOWN:
@@ -137,6 +145,9 @@ class StimulusPresentation(MainloopFeedback):
             self.clock.tick(self.fps)
 
     def pause_tick(self):
+        """
+        Pause Feedback.
+        """
             txt = self.font.render("PAUSE",self.ANTIALIAS,self.color)
             txt_rect = txt.get_rect(center=self.screenCenter)
             self.screen.blit(self.background,self.background_rect)
@@ -145,6 +156,11 @@ class StimulusPresentation(MainloopFeedback):
             self.clock.tick(self.fps)
             
     def countdown(self):
+        """
+        Countdown at beginning of StimulusPresentation. nCountdown indicates number of seconds
+        to countdown. (Ex. if nCountdown=0 then countdown does not occur, if nCountdown=5 then 
+        countdown proceeds backwards from 5)
+        """
         if self.currentTick/self.fps == self.nCountdown:
             #self.send_parallel(self.COUNTDOWN_END)
             # Finished counting, draw background
@@ -174,8 +190,10 @@ class StimulusPresentation(MainloopFeedback):
             self.currentTick += 1
                           
     def stim(self):
+        """
+        Iterate through sequence list and display each stimulus in order. 
+        """
         if self.currentTick == self.stimTime:
-            # Finished
             self.screen.blit(self.background,self.background_rect)
             pygame.display.update()
             self.state_finished = True
@@ -190,8 +208,10 @@ class StimulusPresentation(MainloopFeedback):
             self.currentTick += 1
    
     def cue(self):
+        """
+        Display cue symbol. Vary color depending on feedback if colorCue==True.
+        """
         if self.currentTick == self.cueTime:
-            # Finished
             self.screen.blit(self.background,self.background_rect)
             pygame.display.update()
             self.state_finished = True
@@ -206,13 +226,15 @@ class StimulusPresentation(MainloopFeedback):
                 txt = self.cueFont.render("+",self.ANTIALIAS,self.color)
             txt_rect = txt.get_rect(center=self.screenCenter)
             self.screen.blit(self.background,self.background_rect)
-            #print datetime.now() - self.current
             self.screen.blit(txt, txt_rect)
-            #self.current = datetime.now()
             pygame.display.update()
             self.currentTick += 1
     
     def predelay(self):
+        """
+        Delay prior to stimulus presentation. The TTL code for the currentStim is sent via parallel port now
+        in order to compensate for communication lag.
+        """
         if self.currentTick == self.preDelayTime:
             # Finished
             self.screen.blit(self.background,self.background_rect)
@@ -235,6 +257,10 @@ class StimulusPresentation(MainloopFeedback):
                     print self.sound.get_length()
         
     def postdelay(self):
+        """
+        Delay after stimulus presentation. The TTL code for the cue is sent via parallel port now
+        in order to compensate for communication lag.
+        """
         if self.currentTick == self.postDelayTime:
             # Finished
             self.screen.blit(self.background,self.background_rect)
@@ -257,6 +283,9 @@ class StimulusPresentation(MainloopFeedback):
             self.currentTick += 1
 
     def post_mainloop(self):
+        """
+        Executes upon completion of StimulusPresentation and closes pygame instance. 
+        """
         if self.auditoryFeedback:
             self.sound = None
             pygame.mixer.quit()
@@ -282,6 +311,3 @@ if __name__ == "__main__":
     a = StimulusPresentation()
     a.on_init()
     a.on_play()
-
-  #  a.on_quit()
-   # sys.exit()
