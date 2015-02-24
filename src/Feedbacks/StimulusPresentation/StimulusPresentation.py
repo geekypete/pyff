@@ -11,24 +11,24 @@ class StimulusPresentation(MainloopFeedback):
         """
         Initialize  user modifiable variables for stimulus presentation. 
         """
-        self.nCountdown = 0                 # N of secs to count down
-        self.auditoryFeedback = True    # Auditory feedback provided
-        self.preDelayTime =  1000         
-        self.postDelayTime = 1000
-        self.stimTime = 500
-        self.cueTime = 500
-        self.cueFirst = True
-        self.colorCue = True
-        self.cueSize = 400
-        self.cueVal = 9
-        self.redcueVal = 8
-        self.greencueVal = 7
-        self.wordPath = "C:/Documents and Settings/Stim2 Computer/My Documents/nonword.csv"
-        self.bgcolor = 0, 0, 0
-        self.screenPos = [200,200,1024,768]
-        self.fullscreen = True
-        self.color = 255,255,255       # Color of symbol
-        self.size = 125             # Size of symbol 
+        self.nCountdown = 0                 #N of secs to count down
+        self.auditoryFeedback = True    #Auditory feedback provided
+        self.preDelayTime =  1000         #Delay time before stimulus presentation in ms
+        self.postDelayTime = 1000         #Delay time after stimulus presentation in ms
+        self.stimTime = 500                   #Time to display the stimulus (word) in ms
+        self.cueTime = 500                    #Time to display the cue (+) in ms
+        self.cueFirst = True                   #Presents the cue first if true, else it presents the stimulus first 
+        self.colorCue = True                 #If true it utilizes feedback to color the cue, otherwise the cue is presented as the same color as the stim
+        self.cueSize = 400                     #Cue size in pixel height
+        self.cueVal = 9                          #TTL code for the cue when colorCue==False
+        self.redcueVal = 8                     #TTL code for the red cue when colorCue==True
+        self.greencueVal = 7                  #TTL code for the green cue when colorCue==True
+        self.wordPath = "C:/Documents and Settings/Stim2 Computer/My Documents/nonword.csv" #Filepath and filename for the word list with TTL codes
+        self.bgcolor = 0, 0, 0                  #Background color tuple in the form (red, green, blue) where each value varies from 0 to 255
+        self.screenPos = [200,200,1024,768] #Screen position where the first two values specify position origin and the second two values define resolution
+        self.fullscreen = True                 #Sets the gui to fullscreen when True
+        self.color = 255,255,255              #Color of stimulus and cue (when colorCue==False) in the form (red, green, blue) where each value varies from 0 to 255
+        self.size = 125                            #Size of stimuli (word) in pixel height
 
     def _init_pygame(self):
         """
