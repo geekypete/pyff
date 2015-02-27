@@ -17,7 +17,7 @@ class StimulusPresentation(MainloopFeedback):
         self.postDelayTime = 1000         #Delay time after stimulus presentation in ms
         self.stimTime = 500                   #Time to display the stimulus (word) in ms
         self.cueTime = 500                    #Time to display the cue (+) in ms
-        self.cueFirst = True                   #Presents the cue first if true, else it presents the stimulus first 
+        self.cueFirst = False                   #Presents the cue first if true, else it presents the stimulus first 
         self.colorCue = True                 #If true it utilizes feedback to color the cue, otherwise the cue is presented as the same color as the stim
         self.cueSize = 400                     #Cue size in pixel height
         self.cueVal = 9                          #TTL code for the cue when colorCue==False
@@ -76,8 +76,8 @@ class StimulusPresentation(MainloopFeedback):
         dir = os.path.dirname(sys.modules[__name__].__file__) # Get current dir
         self.sound = pygame.mixer.Sound(dir + "/Tone.wav")
         self.stimTime = BCI.fpsConvert((self.stimTime),self.fps) #BCI.fpsConvert(100,self.fps)               # How long the stimulus is displayed (in frames)
-        self.preDelayTime = BCI.fpsConvert(self.preDelayTime,self.fps)     # How long to wait before response is accepted  # How long to wait before response is accepted 
-        self.postDelayTime = BCI.fpsConvert(self.postDelayTime,self.fps)    
+        self.preDelayTime = BCI.fpsConvert(self.preDelayTime - 20,self.fps)     # How long to wait before response is accepted  # How long to wait before response is accepted 
+        self.postDelayTime = BCI.fpsConvert(self.postDelayTime - 55,self.fps)    
         self.cueTime = BCI.fpsConvert((self.cueTime),self.fps) 
    
     def tick(self):
@@ -148,12 +148,12 @@ class StimulusPresentation(MainloopFeedback):
         """
         Pause Feedback.
         """
-            txt = self.font.render("PAUSE",self.ANTIALIAS,self.color)
-            txt_rect = txt.get_rect(center=self.screenCenter)
-            self.screen.blit(self.background,self.background_rect)
-            self.screen.blit(txt, txt_rect)
-            pygame.display.update()
-            self.clock.tick(self.fps)
+        txt = self.font.render("PAUSE",self.ANTIALIAS,self.color)
+        txt_rect = txt.get_rect(center=self.screenCenter)
+        self.screen.blit(self.background,self.background_rect)
+        self.screen.blit(txt, txt_rect)
+        pygame.display.update()
+        self.clock.tick(self.fps)
             
     def countdown(self):
         """
@@ -248,7 +248,14 @@ class StimulusPresentation(MainloopFeedback):
             self.currentTick += 1
             if self.cueFirst:
                 if self.currentTick ==self.preDelayTime-6:
-                    self.send_parallel(int('{:07b}'.format(self.cueVal)[::-1],2))
+                    if self.colorCue == False:
+                        self.send_parallel(int('{:07b}'.format(self.cueVal)[::-1],2))
+                    else:
+                        if self.sequence[self.currentStim-1][2]>1:
+                            self.send_parallel(int('{:07b}'.format(self.redcueVal)[::-1],2))
+                           
+                        if self.sequence[self.currentStim-1][2]<2:
+                            self.send_parallel(int('{:07b}'.format(self.greencueVal)[::-1],2))
             else:
                 if self.currentTick == self.postDelayTime-6:
                     self.send_parallel(int('{:07b}'.format(self.sequence[self.currentStim-1] [1])[::-1],2))      
@@ -279,7 +286,14 @@ class StimulusPresentation(MainloopFeedback):
                     self.sound.play()
             else:
                 if self.currentTick ==self.preDelayTime-6:
-                    self.send_parallel(int('{:07b}'.format(self.cueVal)[::-1],2))
+                    if self.colorCue == False:
+                        self.send_parallel(int('{:07b}'.format(self.cueVal)[::-1],2))
+                    else:
+                        if self.sequence[self.currentStim-1][2]>1:
+                            self.send_parallel(int('{:07b}'.format(self.redcueVal)[::-1],2))
+                           
+                        if self.sequence[self.currentStim-1][2]<2:
+                            self.send_parallel(int('{:07b}'.format(self.greencueVal)[::-1],2))
             self.currentTick += 1
 
     def post_mainloop(self):
