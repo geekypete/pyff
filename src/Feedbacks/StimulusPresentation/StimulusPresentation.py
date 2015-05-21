@@ -13,19 +13,19 @@ class StimulusPresentation(MainloopFeedback):
         """
         self.nCountdown = 0                 #N of secs to count down
         self.auditoryFeedback = True    #Auditory feedback provided
-        self.preDelayTime =  1000         #Delay time before stimulus presentation in ms
-        self.postDelayTime = 1000         #Delay time after stimulus presentation in ms
-        self.stimTime = 500                   #Time to display the stimulus (word) in ms
-        self.cueTime = 500                    #Time to display the cue (+) in ms
+        self.preDelayLen =  1000         #Delay time before stimulus presentation in ms
+        self.postDelayLen = 1000         #Delay time after stimulus presentation in ms
+        self.stimLen = 500                   #Time to display the stimulus (word) in ms
+        self.cueLen = 500                    #Time to display the cue (+) in ms
         self.cueFirst = False                   #Presents the cue first if true, else it presents the stimulus first 
         self.colorCue = True                 #If true it utilizes feedback to color the cue, otherwise the cue is presented as the same color as the stim
-        self.cueSize = 400                     #Cue size in pixel height
+        self.cueSize = 350                     #Cue size in pixel height
         self.cueVal = 9                          #TTL code for the cue when colorCue==False
         self.redcueVal = 8                     #TTL code for the red cue when colorCue==True
         self.greencueVal = 7                  #TTL code for the green cue when colorCue==True
         self.wordPath = "C:/Documents and Settings/Stim2 Computer/My Documents/nonword.csv" #Filepath and filename for the word list with TTL codes
         self.bgcolor = 0, 0, 0                  #Background color tuple in the form (red, green, blue) where each value varies from 0 to 255
-        self.screenPos = [200,200,1024,768] #Screen position where the first two values specify position origin and the second two values define resolution
+        self.screenPos = [200,200,800,600] #Screen position where the first two values specify position origin and the second two values define resolution
         self.fullscreen = True                 #Sets the gui to fullscreen when True
         self.color = 255,255,255              #Color of stimulus and cue (when colorCue==False) in the form (red, green, blue) where each value varies from 0 to 255
         self.size = 125                            #Size of stimuli (word) in pixel height
@@ -75,10 +75,10 @@ class StimulusPresentation(MainloopFeedback):
         self.p = parallel.Parallel()
         dir = os.path.dirname(sys.modules[__name__].__file__) # Get current dir
         self.sound = pygame.mixer.Sound(dir + "/Tone.wav")
-        self.stimTime = BCI.fpsConvert((self.stimTime),self.fps) #BCI.fpsConvert(100,self.fps)               # How long the stimulus is displayed (in frames)
-        self.preDelayTime = BCI.fpsConvert(self.preDelayTime - 90,self.fps)     # How long to wait before response is accepted  # How long to wait before response is accepted 
-        self.postDelayTime = BCI.fpsConvert(self.postDelayTime - 60,self.fps)  #Gives 1500 when predelay set at 90   
-        self.cueTime = BCI.fpsConvert((self.cueTime),self.fps) 
+        self.stimTime = BCI.fpsConvert(self.stimLen,self.fps) #BCI.fpsConvert(100,self.fps)               # How long the stimulus is displayed (in frames)
+        self.preDelayTime = BCI.fpsConvert(self.preDelayLen- 30,self.fps)     # How long to wait before response is accepted  # How long to wait before response is accepted 
+        self.postDelayTime = BCI.fpsConvert(self.postDelayLen- 30,self.fps)  #Gives 1500 when predelay set at 90   
+        self.cueTime = BCI.fpsConvert(self.cueLen,self.fps) 
    
     def tick(self):
         """
@@ -120,7 +120,6 @@ class StimulusPresentation(MainloopFeedback):
                     self.state = self.CUE
                 elif self.state == self.CUE:
                     self.state = self.PREDELAY
-
                 self.currentTick = 0       
                 self.state_finished = False
 
@@ -143,6 +142,21 @@ class StimulusPresentation(MainloopFeedback):
 
             # Keep running at the number of fps specified
             self.clock.tick(self.fps)
+            #print pygame.key.get_pressed()[1]
+            for event in pygame.event.get():
+                if event.type== pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        return
+                    elif event.key == pygame.K_f:
+                        if self.fullscreen:
+                            self.screen = pygame.display.set_mode((self.screenPos[2],self.screenPos[3]))
+                            self.fullscreen=False
+                        else:
+                            opts = pygame.FULLSCREEN
+                            self.screen = pygame.display.set_mode((self.screenPos[2],self.screenPos[3]),opts)
+                            self.fullscreen=True
+
 
     def pause_tick(self):
         """
@@ -245,7 +259,7 @@ class StimulusPresentation(MainloopFeedback):
             # Draw background
             self.screen.blit(self.background,self.background_rect)
             pygame.display.update()
-            self.currentTick += 1
+            print str(self.currentTick) + " current"
             if self.cueFirst:
                 if self.currentTick ==self.preDelayTime-6:
                     if self.colorCue == False:
@@ -257,12 +271,13 @@ class StimulusPresentation(MainloopFeedback):
                         if self.sequence[self.currentStim-1][2]<2:
                             self.send_parallel(int('{:07b}'.format(self.greencueVal)[::-1],2))
             else:
-                if self.currentTick == self.postDelayTime-6:
+                if self.currentTick == self.preDelayTime-6:
+                    print "///////////////////////////////////////////////////////////////////////////////////////////////"
                     self.send_parallel(int('{:07b}'.format(self.sequence[self.currentStim-1] [1])[::-1],2))      
                 if self.currentTick == BCI.fpsConvert(300,60):
                     self.sound.play()
                     print self.sound.get_length()
-        
+            self.currentTick += 1
     def postdelay(self):
         """
         Delay after stimulus presentation. The TTL code for the cue is sent via parallel port now
@@ -278,14 +293,15 @@ class StimulusPresentation(MainloopFeedback):
             # Draw background
             self.screen.blit(self.background,self.background_rect)
             pygame.display.update()
-
+            print str(self.currentTick) + " current"
             if self.cueFirst:
                 if self.currentTick == self.postDelayTime-6:
                     self.send_parallel(int('{:07b}'.format(self.sequence[self.currentStim-1] [1])[::-1],2))
                 if self.currentTick == BCI.fpsConvert(300,60):
                     self.sound.play()
             else:
-                if self.currentTick ==self.preDelayTime-6:
+                if self.currentTick ==self.postDelayTime-6:
+                    print str(self.preDelayTime-6) + "+++++++++++++++++++++++++++++++++++++++++"
                     if self.colorCue == False:
                         self.send_parallel(int('{:07b}'.format(self.cueVal)[::-1],2))
                     else:
@@ -305,7 +321,17 @@ class StimulusPresentation(MainloopFeedback):
             pygame.mixer.quit()
         pygame.quit()
         #self.send_parallel(self.RUN_END)
-        
+    def exitFullscreen(self):
+        """
+        Return true if pygame window has focus. Otherwise display text
+        and return false.
+        """
+        e = pygame.event.get()
+        if (e.type is KEYDOWN and e.key == K_f):
+            if screen.get_flags() & FULLSCREEN:
+                pygame.display.set_mode(size)
+            else:
+                pygame.display.set_mode(size, FULLSCREEN)
     def checkWindowFocus(self):
         """
         Return true if pygame window has focus. Otherwise display text
