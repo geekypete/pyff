@@ -76,8 +76,8 @@ class StimulusPresentation(MainloopFeedback):
         dir = os.path.dirname(sys.modules[__name__].__file__) # Get current dir
         self.sound = pygame.mixer.Sound(dir + "/Tone.wav")
         self.stimTime = BCI.fpsConvert((self.stimTime),self.fps) #BCI.fpsConvert(100,self.fps)               # How long the stimulus is displayed (in frames)
-        self.preDelayTime = BCI.fpsConvert(self.preDelayTime - 20,self.fps)     # How long to wait before response is accepted  # How long to wait before response is accepted 
-        self.postDelayTime = BCI.fpsConvert(self.postDelayTime - 55,self.fps)    
+        self.preDelayTime = BCI.fpsConvert(self.preDelayTime - 90,self.fps)     # How long to wait before response is accepted  # How long to wait before response is accepted 
+        self.postDelayTime = BCI.fpsConvert(self.postDelayTime - 60,self.fps)  #Gives 1500 when predelay set at 90   
         self.cueTime = BCI.fpsConvert((self.cueTime),self.fps) 
    
     def tick(self):
